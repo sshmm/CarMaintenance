@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Car Maintenance</string>
+    <string name="tab_text_1">Summary</string>
+    <string name="tab_text_2">Upcoming</string>
+    <string name="tab_text_3">Archive</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+</resources>
