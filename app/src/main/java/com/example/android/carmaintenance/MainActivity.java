@@ -6,7 +6,9 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AlertDialogLayout;
 import android.support.v7.widget.Toolbar;
 
 import android.support.v4.app.Fragment;
@@ -20,6 +22,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +31,9 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 
@@ -51,8 +58,12 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
 
 
-    FirebaseAuth firebaseAuth;
-    FirebaseAuth.AuthStateListener authStateListener;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseAuth.AuthStateListener authStateListener;
+
+    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
+    private ChildEventListener childEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDatabase = FirebaseDatabase.getInstance();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -82,8 +94,41 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                final AlertDialog alertDialog;
+                final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                View view1 = getLayoutInflater().inflate(R.layout.update_service_layout,null);
+                final EditText serviceText = view1.findViewById(R.id.et_service_name);
+                final EditText priceText = view1.findViewById(R.id.et_price);
+                final EditText periodText = view1.findViewById(R.id.et_periodicity);
+                final EditText lastText = view1.findViewById(R.id.et_last_time);
+                Button updateButton = view1.findViewById(R.id.bn_save);
+
+                dialogBuilder.setView(view1);
+                alertDialog = dialogBuilder.create();
+
+                updateButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String serviceName = serviceText.getText().toString();
+                        String servicePrice = priceText.getText().toString();
+                        String periodDistance = periodText.getText().toString();
+                        String lastService = lastText.getText().toString();
+                        if (!serviceName.isEmpty() || !periodDistance.isEmpty() || !lastService.isEmpty()|| !servicePrice.isEmpty() ){
+
+                            MaintenanceService maintenanceService = new MaintenanceService(serviceName,  Integer.parseInt(periodDistance), Integer.parseInt(lastService)
+                                    ,true,  Double.parseDouble(servicePrice));
+
+                            databaseReference.push().setValue(maintenanceService);
+                            alertDialog.dismiss();
+
+                        } else {
+                            Toast.makeText(MainActivity.this,com.example.android.carmaintenance.R.string.empty_service,Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+
+                alertDialog.show();
+
             }
         });
 
@@ -94,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 /*Check if there is a logged in user or not*/
 
                 if (firebaseUser != null){
-                    onSignedInActions(firebaseUser.getDisplayName());
+                    onSignedInActions(firebaseUser.getUid());
                 } else {
                     onSignedOutActions();
                     startActivityForResult(
@@ -238,7 +283,10 @@ public class MainActivity extends AppCompatActivity {
         //TODO if signed out actions
     }
 
-    private void onSignedInActions(String username){
+    private void onSignedInActions(String userUid){
         //TODO on sign in actions
+        databaseReference = firebaseDatabase.getReference().child(userUid);
     }
+
+
 }
