@@ -1,6 +1,9 @@
 package com.example.android.carmaintenance;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,7 @@ import android.widget.TextView;
 import com.example.android.carmaintenance.ServiceFragment.OnListFragmentInteractionListener;
 import com.example.android.carmaintenance.dummy.DummyContent.DummyItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,12 +22,12 @@ import java.util.List;
  */
 public class MyServiceRecyclerViewAdapter extends RecyclerView.Adapter<MyServiceRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private  ArrayList<MaintenanceService> mValues = new ArrayList<>();
     private final OnListFragmentInteractionListener mListener;
 
-    public MyServiceRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
-        mListener = listener;
+
+    public MyServiceRecyclerViewAdapter( OnListFragmentInteractionListener listener) {
+            mListener = listener;
     }
 
     @Override
@@ -36,16 +40,17 @@ public class MyServiceRecyclerViewAdapter extends RecyclerView.Adapter<MyService
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+        holder.mIdView.setText(holder.mItem.getServiceName());
+        Log.e("Valueeeeeeeeeeees",mValues.get(0).getServiceName());
+        holder.mContentView.setText(mValues.get(position).getServiceName());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
+                    // Notify the active callbaks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
+                //    mListener.onListFragmentInteraction(holder.mItem);
                 }
             }
         });
@@ -60,7 +65,7 @@ public class MyServiceRecyclerViewAdapter extends RecyclerView.Adapter<MyService
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public DummyItem mItem;
+        public MaintenanceService mItem;
 
         public ViewHolder(View view) {
             super(view);
@@ -73,5 +78,11 @@ public class MyServiceRecyclerViewAdapter extends RecyclerView.Adapter<MyService
         public String toString() {
             return super.toString() + " '" + mContentView.getText() + "'";
         }
+    }
+
+    public void setAdapterData(ArrayList<MaintenanceService> maintenanceServices){
+        mValues = maintenanceServices;
+        Log.e("setData2",mValues.get(0).getServiceName());
+
     }
 }
