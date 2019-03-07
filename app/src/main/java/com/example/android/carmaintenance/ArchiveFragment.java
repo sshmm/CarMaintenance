@@ -1,13 +1,9 @@
 package com.example.android.carmaintenance;
 
-import android.app.Activity;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.android.carmaintenance.dummy.DummyContent;
 import com.example.android.carmaintenance.dummy.DummyContent.DummyItem;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -23,8 +18,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -32,14 +30,14 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class ServiceFragment extends Fragment /* TODO implements MainActivity.OnFragmentInteractionListner*/{
+public class ArchiveFragment extends Fragment /* TODO implements MainActivity.OnFragmentInteractionListner*/{
 
 
     // TODO: Customize parameter argument names
     private static final String USER_NAME = "user_name";
     // TODO: Customize parameters
-    private OnListFragmentInteractionListener mListener;
-    private MyServiceRecyclerViewAdapter adapter;
+    private OnArchiveListFragmentInteractionListener mListener;
+    private ArchiveRecyclerViewAdapter adapter;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
     private ChildEventListener childEventListener;
@@ -52,13 +50,13 @@ public class ServiceFragment extends Fragment /* TODO implements MainActivity.On
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ServiceFragment() {
+    public ArchiveFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static ServiceFragment newInstance(String userUid) {
-        ServiceFragment fragment = new ServiceFragment();
+    public static ArchiveFragment newInstance(String userUid) {
+        ArchiveFragment fragment = new ArchiveFragment();
         Bundle args = new Bundle();
         args.putString(USER_NAME,userUid);
         fragment.setArguments(args);
@@ -89,8 +87,7 @@ public class ServiceFragment extends Fragment /* TODO implements MainActivity.On
             Context context = view.getContext();
             recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            adapter = new  MyServiceRecyclerViewAdapter( mListener);
-            Log.e("adpterDataSet","2");
+            adapter = new  ArchiveRecyclerViewAdapter( mListener);
 
         }
         return view;
@@ -99,13 +96,13 @@ public class ServiceFragment extends Fragment /* TODO implements MainActivity.On
 
     @Override
     public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
+        super.onAttach(context);/*
+        if (context instanceof OnArchiveListFragmentInteractionListener) {
             mListener = (OnListFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
+                    + " must implement OnArchiveListFragmentInteractionListener");
+        }*/
     }
 
     @Override
@@ -132,9 +129,9 @@ public class ServiceFragment extends Fragment /* TODO implements MainActivity.On
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnListFragmentInteractionListener {
+    public interface OnArchiveListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(KeyService keyService);
+        void onListFragmentInteraction(DummyItem item);
     }
 
     @Override
@@ -154,13 +151,14 @@ public class ServiceFragment extends Fragment /* TODO implements MainActivity.On
                     for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                         MaintenanceService maintenanceService = dataSnapshot1.getValue(MaintenanceService.class);
                         String key = dataSnapshot1.getKey();
-                        if (maintenanceService.isState())
+
+                        if (!maintenanceService.isState())
                             maintenanceServices.add(new KeyService(key,maintenanceService));
 
                     }
                    // Log.e("fffffffffff",maintenanceServices.get((maintenanceServices.size())-1).getServiceName());
                     Log.e("adpterDataSet","1");
-                    adapter.setAdapterData(maintenanceServices, getArguments().getString(USER_NAME));
+                    adapter.setAdapterData(maintenanceServices);
                     recyclerView.setAdapter(adapter);
 
                 }
@@ -171,13 +169,14 @@ public class ServiceFragment extends Fragment /* TODO implements MainActivity.On
                     for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
                         MaintenanceService maintenanceService = dataSnapshot1.getValue(MaintenanceService.class);
                         String key = dataSnapshot1.getKey();
-                        if (maintenanceService.isState())
+
+                        if (!maintenanceService.isState())
                             maintenanceServices.add(new KeyService(key,maintenanceService));
 
                     }
                     // Log.e("fffffffffff",maintenanceServices.get((maintenanceServices.size())-1).getServiceName());
                     Log.e("adpterDataSet","1");
-                    adapter.setAdapterData(maintenanceServices, getArguments().getString(USER_NAME));
+                    adapter.setAdapterData(maintenanceServices);
                     recyclerView.setAdapter(adapter);
                 }
 

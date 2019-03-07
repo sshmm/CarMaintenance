@@ -17,4 +17,5 @@
     <string name="discard">Discard</string>
     <string name="delete">Delete</string>
     <string name="empty_service">Please Don\'t leave the service details empty</string>
+    <string name="done">Done</string>
 </resources>

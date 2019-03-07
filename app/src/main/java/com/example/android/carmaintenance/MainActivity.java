@@ -41,7 +41,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity implements ServiceFragment.OnListFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -212,7 +212,50 @@ public class MainActivity extends AppCompatActivity  {
 
     }
 
+    @Override
+    public void onListFragmentInteraction(final KeyService keyService) {
 
+        final AlertDialog alertDialog;
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        View view1 = getLayoutInflater().inflate(R.layout.update_service_layout,null);
+        final EditText serviceText = view1.findViewById(R.id.et_service_name);
+        final EditText priceText = view1.findViewById(R.id.et_price);
+        final EditText periodText = view1.findViewById(R.id.et_periodicity);
+        final EditText lastText = view1.findViewById(R.id.et_last_time);
+        Button updateButton = view1.findViewById(R.id.bn_save);
+
+        serviceText.setText(keyService.getMaintenanceService().getServiceName());
+        priceText.setText(Double.toString(keyService.getMaintenanceService().getPrice()));
+        periodText.setText(Integer.toString(keyService.getMaintenanceService().getPeriodicity()));
+        lastText.setText(Integer.toString(keyService.getMaintenanceService().getLastTime()));
+
+        dialogBuilder.setView(view1);
+        alertDialog = dialogBuilder.create();
+
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String serviceName = serviceText.getText().toString();
+                String servicePrice = priceText.getText().toString();
+                String periodDistance = periodText.getText().toString();
+                String lastService = lastText.getText().toString();
+                if (!serviceName.isEmpty() || !periodDistance.isEmpty() || !lastService.isEmpty()|| !servicePrice.isEmpty() ){
+
+                    MaintenanceService maintenanceService = new MaintenanceService(serviceName,  Integer.parseInt(periodDistance), Integer.parseInt(lastService)
+                            ,true,  Double.parseDouble(servicePrice));
+
+                    databaseReference.child(keyService.getKey()).setValue(maintenanceService);
+                    alertDialog.dismiss();
+
+                } else {
+                    Toast.makeText(MainActivity.this,com.example.android.carmaintenance.R.string.empty_service,Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        alertDialog.show();
+
+    }
 
 
     /**
@@ -264,15 +307,18 @@ public class MainActivity extends AppCompatActivity  {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            if (position != 0){
+            if (position == 1){
 
                 return ServiceFragment.newInstance(mUserUid);
 
-            }else {
+            } else if (position == 2){
+                return ArchiveFragment.newInstance(mUserUid);
+            } else{
                 return PlaceholderFragment.newInstance(position + 1);
 
             }
         }
+
 
         @Override
         public int getCount() {
