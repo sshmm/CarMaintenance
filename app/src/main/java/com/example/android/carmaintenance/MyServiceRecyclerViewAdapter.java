@@ -1,5 +1,7 @@
 package com.example.android.carmaintenance;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
@@ -11,23 +13,18 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.android.carmaintenance.ServiceFragment.OnListFragmentInteractionListener;
-import com.example.android.carmaintenance.dummy.DummyContent.DummyItem;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
 public class MyServiceRecyclerViewAdapter extends RecyclerView.Adapter<MyServiceRecyclerViewAdapter.ViewHolder> {
 
     private  ArrayList<KeyService> mValues = new ArrayList<>();
     private final OnListFragmentInteractionListener mListener;
     private String userUid;
+    private int currentDistance;
 
 
     public MyServiceRecyclerViewAdapter( OnListFragmentInteractionListener listener) {
@@ -48,16 +45,32 @@ public class MyServiceRecyclerViewAdapter extends RecyclerView.Adapter<MyService
         holder.doneButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    MaintenanceService finished = holder.mItem.getMaintenanceService();
+
+                    MaintenanceService maintenanceService = new MaintenanceService(finished.getServiceName(),
+                            finished.getPeriodicity(),currentDistance,true,finished.getPrice());
                     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-                    DatabaseReference databaseReference = firebaseDatabase.getReference().child(userUid).child("services").child(holder.mItem.key);
+                    DatabaseReference databaseReference =  firebaseDatabase.getReference().child(userUid).child("services");
+                    databaseReference.push().setValue(maintenanceService);
+                    databaseReference = firebaseDatabase.getReference().child(userUid).child("services").child(holder.mItem.key);
                     databaseReference.child("state").setValue(false);
+                    databaseReference.child("lastTime").setValue(currentDistance);
 
                 }
             });
 
-        String disString = "Due in " + holder.mItem.getMaintenanceService().getPeriodicity();
+        String disString = "";
+        Context context = holder.mDisView.getContext();
+        int due = (holder.mItem.getMaintenanceService().getPeriodicity() + holder.mItem.getMaintenanceService().getLastTime()) - currentDistance;
+        if (due >= 0){
+            disString = context.getResources().getString(R.string.due_in) + " " + due + context.getResources().getString(R.string.unit);
+        }else {
+            disString = (due * -1) +context.getResources().getString(R.string.unit)+ " " +context.getResources().getString(R.string.over_due);
+        }
         holder.mDisView.setText(disString);
-        holder.mPriceView.setText(Double.toString(holder.mItem.getMaintenanceService().getPrice()));
+
+        String price = holder.mItem.getMaintenanceService().getPrice() + context.getResources().getString(R.string.unit2);
+        holder.mPriceView.setText(price);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +96,6 @@ public class MyServiceRecyclerViewAdapter extends RecyclerView.Adapter<MyService
         public final TextView mPriceView;
         public final Button doneButton;
         public KeyService mItem;
-
         public ViewHolder(View view) {
             super(view);
             mView = view;
@@ -100,9 +112,10 @@ public class MyServiceRecyclerViewAdapter extends RecyclerView.Adapter<MyService
         }
     }
 
-    public void setAdapterData(ArrayList<KeyService> maintenanceServices , String userUid){
+    public void setAdapterData(ArrayList<KeyService> maintenanceServices , String userUid, int currentDistance){
         this.userUid = userUid;
         mValues = maintenanceServices;
+        this.currentDistance = currentDistance;
         notifyDataSetChanged();
 
     }

@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:focusable="true"
     tools:context=".MainActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -36,27 +37,48 @@
                 android:id="@+id/tabItem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:nextFocusForward="@+id/tabItem2"
                 android:text="@string/tab_text_1" />
 
             <android.support.design.widget.TabItem
                 android:id="@+id/tabItem2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:nextFocusForward="@id/tabItem3"
                 android:text="@string/tab_text_2" />
 
             <android.support.design.widget.TabItem
                 android:id="@+id/tabItem3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:nextFocusForward="@id/et_distance"
                 android:text="@string/tab_text_3" />
 
         </android.support.design.widget.TabLayout>
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgrou5432wsssssssssa
-            android:text="Tesssssssssssss"
-            android:gravity="center_horizontal"/>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:background="#FFFFFF"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/focus"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:nextFocusForward="@id/container" />
+            <EditText
+                android:id="@+id/et_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:hint="@string/_80000km"
+                android:textColorHint="@color/browser_actions_bg_grey"
+                android:inputType="numberDecimal"
+                android:layout_gravity="center_horizontal"
+                android:nextFocusUp="@id/focus"
+                android:nextFocusLeft="@id/focus"/>
+        </FrameLayout>
+
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager

@@ -1,5 +1,6 @@
 package com.example.android.carmaintenance;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,23 +9,19 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.android.carmaintenance.ServiceFragment.OnListFragmentInteractionListener;
-import com.example.android.carmaintenance.dummy.DummyContent.DummyItem;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
+
 public class ArchiveRecyclerViewAdapter extends RecyclerView.Adapter<ArchiveRecyclerViewAdapter.ViewHolder> {
 
     private  ArrayList<KeyService> mValues = new ArrayList<>();
-    private final ArchiveFragment.OnArchiveListFragmentInteractionListener mListener;
+    private String userUid;
 
 
-    public ArchiveRecyclerViewAdapter(ArchiveFragment.OnArchiveListFragmentInteractionListener listener) {
-            mListener = listener;
+    public ArchiveRecyclerViewAdapter() {
     }
 
     @Override
@@ -36,21 +33,26 @@ public class ArchiveRecyclerViewAdapter extends RecyclerView.Adapter<ArchiveRecy
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        Context context = holder.mDisView.getContext();
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(holder.mItem.getMaintenanceService().getServiceName());
-            holder.doneButton.setVisibility(View.GONE);
-        String disString = "Due in " + holder.mItem.getMaintenanceService().getPeriodicity();
-        holder.mDisView.setText(disString);
-        holder.mPriceView.setText(Double.toString(holder.mItem.getMaintenanceService().getPrice()));
+        holder.doneButton.setText(context.getResources().getString(R.string.delete));
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+
+        String disString = context.getResources().getString(R.string.serviced_at) +" " + holder.mItem.getMaintenanceService().getLastTime();
+        holder.mDisView.setText(disString);
+
+        String price = context.getResources().getString(R.string.cost) + holder.mItem.getMaintenanceService().getPrice() + context.getResources().getString(R.string.unit2);
+
+        holder.mPriceView.setText(price);
+
+        holder.doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbaks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                //    mListener.onListFragmentInteraction(holder.mItem);
-                }
+                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                DatabaseReference databaseReference =  firebaseDatabase.getReference().child(userUid).child("services");
+                databaseReference = firebaseDatabase.getReference().child(userUid).child("services").child(holder.mItem.key);
+                databaseReference.removeValue();
             }
         });
     }
@@ -84,7 +86,8 @@ public class ArchiveRecyclerViewAdapter extends RecyclerView.Adapter<ArchiveRecy
         }
     }
 
-    public void setAdapterData(ArrayList<KeyService> maintenanceServices){
+    public void setAdapterData(ArrayList<KeyService> maintenanceServices, String userUid){
+        this.userUid = userUid;
         mValues = maintenanceServices;
 
     }

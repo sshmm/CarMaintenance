@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "473141032893-tm0qes3opcji1q2mpm6ch4tbv12kih0g.apps.googleusercontent.com",
+          "client_id": "473141032893-v5hvdtnf9rt55cjn2b8dojm1uis7epcs.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.android.carmaintenance",
-            "certificate_hash": "10d22a5cf65a562cb1aa9a45b05df8c6901ceeff"
+            "certificate_hash": "17ddee0c6f99d6637566eefc7d60fd63507d36e8"
           }
         },
         {

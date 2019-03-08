@@ -15,7 +15,8 @@
         android:hint="@string/service_name"
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:nextFocusForward="@id/tv_periodicity"/>
 
     <TextView
         android:id="@+id/tv_periodicity"
@@ -25,6 +26,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:text="@string/periodicity"
+        android:nextFocusForward="@id/et_periodicity"
         app:layout_constraintBottom_toBottomOf="@+id/et_periodicity"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_service_name" />
@@ -39,6 +41,7 @@
         android:ems="10"
         android:hint="@string/_1000_km"
         android:inputType="numberDecimal"
+        android:nextFocusForward="@id/tv_price"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/tv_periodicity"
         app:layout_constraintTop_toBottomOf="@+id/et_service_name" />
@@ -46,11 +49,12 @@
     <TextView
         android:id="@+id/tv_price"
         android:layout_width="wrap_content"
-        android:layout_height="15dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:text="@string/price"
+        android:nextFocusForward="@id/et_price"
         app:layout_constraintBottom_toBottomOf="@+id/et_price"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_periodicity" />
@@ -65,6 +69,7 @@
         android:ems="10"
         android:hint="@string/_20"
         android:inputType="number"
+        android:nextFocusForward="@id/tv_last_time"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/tv_price"
         app:layout_constraintTop_toBottomOf="@+id/et_periodicity" />
@@ -88,6 +93,7 @@
         android:ems="10"
         android:hint="@string/_555km"
         android:inputType="numberDecimal"
+        android:nextFocusForward="@id/bn_save"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_price" />
 
@@ -99,6 +105,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
         android:text="@string/update"
+        android:nextFocusForward="@id/bn_discard"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintHorizontal_bias="0.526"
         app:layout_constraintStart_toStartOf="parent"
@@ -111,6 +118,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
+        android:nextFocusForward="@id/bn_delete"
         android:text="@string/discard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
@@ -135,6 +143,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
         android:text="@string/delete"
+        android:nextFocusForward="@id/et_service_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/bn_discard" />

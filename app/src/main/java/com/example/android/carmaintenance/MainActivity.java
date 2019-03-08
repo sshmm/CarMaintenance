@@ -1,7 +1,10 @@
 package com.example.android.carmaintenance;
 
+import android.appwidget.AppWidgetManager;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +19,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,16 +30,14 @@ import android.view.ViewGroup;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.carmaintenance.dummy.DummyContent;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -58,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
      */
 
     public static final int RC_SIGN_IN = 1;
+    public static final String DISTANCE_KEY = "distance";
 
     private ViewPager mViewPager;
 
@@ -69,9 +73,6 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
     private DatabaseReference databaseReference;
     private ChildEventListener childEventListener;
 
-    //TODO private OnFragmentInteractionListner listner;
-
-    private ArrayList<MaintenanceService> maintenanceServices = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +85,44 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        final EditText distanceField = findViewById(R.id.et_distance);
+        distanceField.setText(String.valueOf(loadPreferences()));
+        distanceField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 0){
+                    distanceField.setText(String.valueOf(loadPreferences()));
+
+                }else{
+                    if (Integer.parseInt(s.toString()) != loadPreferences()){
+                        savePreferences(Integer.valueOf(s.toString()));
+
+                        Intent intentBroad = new Intent(getApplicationContext(), NewAppWidget.class);
+                        intentBroad.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                        AppWidgetManager widgetManager = AppWidgetManager.getInstance(getApplicationContext());
+                        int[] ids = widgetManager.getAppWidgetIds(new ComponentName(getApplicationContext(), NewAppWidget.class));
+                        widgetManager.notifyAppWidgetViewDataChanged(ids, android.R.id.list);
+
+                        intentBroad.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+                        intentBroad.putExtra("distance",loadPreferences());
+                        intentBroad.putExtra("username",mUserUid);
+                        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -96,11 +135,21 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
                 final EditText priceText = view1.findViewById(R.id.et_price);
                 final EditText periodText = view1.findViewById(R.id.et_periodicity);
                 final EditText lastText = view1.findViewById(R.id.et_last_time);
+                final Button deleteButton = view1.findViewById(R.id.bn_delete);
+                final Button discardButton = view1.findViewById(R.id.bn_discard);
+
+                deleteButton.setEnabled(false);
                 Button updateButton = view1.findViewById(R.id.bn_save);
 
                 dialogBuilder.setView(view1);
                 alertDialog = dialogBuilder.create();
 
+                discardButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                    }
+                });
                 updateButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -172,7 +221,6 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
         super.onActivityResult(requestCode, resultCode, data);
             if (requestCode == RC_SIGN_IN) {
                 if (resultCode == RESULT_OK) {
-                    //TODO change toast
                     // Sign-in succeeded
                     Toast.makeText(this, "Signed in!", Toast.LENGTH_SHORT).show();
                 } else if (resultCode == RESULT_CANCELED) {
@@ -181,9 +229,6 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
                     finish();
                 }
             }
-
-            Log.e("ssssssssssssssssss",maintenanceServices.get(0).getServiceName());
-
     }
 
     @Override
@@ -200,8 +245,6 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch(id) {
-            case R.id.action_settings:
-                return true;
             case R.id.sign_out:
                 AuthUI.getInstance().signOut(this);
                 return true;
@@ -223,6 +266,8 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
         final EditText periodText = view1.findViewById(R.id.et_periodicity);
         final EditText lastText = view1.findViewById(R.id.et_last_time);
         Button updateButton = view1.findViewById(R.id.bn_save);
+        final Button deleteButton = view1.findViewById(R.id.bn_delete);
+        final Button discardButton = view1.findViewById(R.id.bn_discard);
 
         serviceText.setText(keyService.getMaintenanceService().getServiceName());
         priceText.setText(Double.toString(keyService.getMaintenanceService().getPrice()));
@@ -232,6 +277,20 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
         dialogBuilder.setView(view1);
         alertDialog = dialogBuilder.create();
 
+        discardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                databaseReference.child(keyService.getKey()).removeValue();
+                alertDialog.dismiss();
+            }
+        });
         updateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -258,40 +317,6 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
     }
 
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
-    }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -334,7 +359,6 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
         firebaseAuth.removeAuthStateListener(authStateListener);
         detachDatabaseReadListener();
 
-        //TODO Detach any listner here
     }
 
     @Override
@@ -344,57 +368,36 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
     }
 
     private void onSignedOutActions(){
-        //TODO if signed out actions
         detachDatabaseReadListener();
+        Intent intentBroad = new Intent(getApplicationContext(), NewAppWidget.class);
+        intentBroad.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+        int[] ids = widgetManager.getAppWidgetIds(new ComponentName(this, NewAppWidget.class));
+        widgetManager.notifyAppWidgetViewDataChanged(ids, android.R.id.list);
+
+        intentBroad.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        intentBroad.putExtra("distance",loadPreferences());
+        intentBroad.putExtra("username","");
+        sendBroadcast(intentBroad);
     }
 
     private void onSignedInActions(String userUid){
         mUserUid = userUid;
-        //TODO on sign in actions
         databaseReference = firebaseDatabase.getReference().child(userUid).child("services");
-      //TODO  attachDatabaseReadListener();
+        Log.e(mUserUid,userUid);
+        Intent intentBroad = new Intent(getApplicationContext(), NewAppWidget.class);
+        intentBroad.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(getApplicationContext());
+        int[] ids = widgetManager.getAppWidgetIds(new ComponentName(getApplicationContext(), NewAppWidget.class));
+        widgetManager.notifyAppWidgetViewDataChanged(ids, android.R.id.list);
+
+        intentBroad.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        intentBroad.putExtra("distance",loadPreferences());
+        intentBroad.putExtra("username",userUid);
+
+        sendBroadcast(intentBroad);
 
     }
-
-
-/*TODO
-    private void attachDatabaseReadListener(){
-        if (childEventListener == null) {
-            childEventListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    MaintenanceService maintenanceService = dataSnapshot.getValue(MaintenanceService.class);
-                    Log.e("ddddddddddd",maintenanceService.getServiceName());
-                    maintenanceServices.add(maintenanceService);
-                    Log.e("fffffffffff",maintenanceServices.get((maintenanceServices.size())-1).getServiceName());
-
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            };
-            databaseReference.addChildEventListener(childEventListener);
-
-
-        }
-    }*/
 
     private void detachDatabaseReadListener(){
         if (childEventListener != null) {
@@ -402,12 +405,18 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
             childEventListener = null;
         }
     }
-/*TODO
-    public interface OnFragmentInteractionListner{
-        void onDataReceived(ArrayList<MaintenanceService> maintenanceServices);
+
+
+    private void savePreferences( int value) {
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(DISTANCE_KEY, value);
+        editor.apply();
     }
 
-    public void setOnFragmentInteractionListner(OnFragmentInteractionListner listner){
-        this.listner = listner;
-    }*/
+    private int loadPreferences() {
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        return sharedPreferences.getInt(DISTANCE_KEY, 0);
+
+    }
 }

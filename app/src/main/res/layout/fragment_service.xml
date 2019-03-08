@@ -15,6 +15,7 @@
         android:layout_margin="@dimen/text_margin"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:nextFocusForward="@id/tv_remaining"
         android:textAppearance="?attr/textAppearanceListItem"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -28,6 +29,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:textAppearance="?attr/textAppearanceListItem"
+        android:nextFocusForward="@id/tv_price_2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_service_name_2"/>
@@ -39,8 +41,10 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:nextFocusForward="@id/button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button"
+        android:textAppearance="?attr/textAppearanceListItemSmall"
         app:layout_constraintStart_toEndOf="@+id/tv_remaining" />
 
     <Button
@@ -52,6 +56,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/done"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:nextFocusForward="@id/tabItem"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>

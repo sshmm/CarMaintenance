@@ -18,4 +18,22 @@
     <string name="delete">Delete</string>
     <string name="empty_service">Please Don\'t leave the service details empty</string>
     <string name="done">Done</string>
+    <string name="_80000km">80000KM</string>
+    <string name="due_in"> Due in</string>
+    <string name="over_due"> Over Due</string>
+    <string name="unit">KM</string>
+    <string name="unit2">$</string>
+    <string name="serviced_at">Serviced At</string>
+    <string name="cost">Cost</string>
+    <string name="current_distance">Current Distance</string>
+    <string name="_0">0</string>
+    <string name="number_of_avtive_services">Number of Avtive Services</string>
+    <string name="change_photo">Change Photo</string>
+    <string name="image_url">Image Url</string>
+    <string name="vehicle_image">Car Image of your choice</string>
+    <string name="failed">Failed to Load Image</string>
+    <string name="loading_image">Loading Image</string>
+    <string name="image_loading">Please wait, Downloading Image File</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
