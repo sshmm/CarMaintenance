@@ -18,7 +18,7 @@
     <string name="delete">Delete</string>
     <string name="empty_service">Please Don\'t leave the service details empty</string>
     <string name="done">Done</string>
-    <string name="_80000km">80000KM</string>
+    <string name="_80000km">Enter Distance</string>
     <string name="due_in"> Due in</string>
     <string name="over_due"> Over Due</string>
     <string name="unit">KM</string>

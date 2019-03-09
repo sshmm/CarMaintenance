@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseDatabase = FirebaseDatabase.getInstance();
 
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() == 0){
-                    distanceField.setText(String.valueOf(loadPreferences()));
+                    savePreferences(0);
 
                 }else{
                     if (Integer.parseInt(s.toString()) != loadPreferences()){
@@ -175,7 +176,6 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
 
             }
         });
-
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -184,6 +184,22 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
 
                 if (firebaseUser != null){
                     onSignedInActions(firebaseUser.getUid());
+
+
+                    // Create the adapter that will return a fragment for each of the three
+                    // primary sections of the activity.
+                    mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+                    // Set up the ViewPager with the sections adapter.
+                    mViewPager = (ViewPager) findViewById(R.id.container);
+                    mViewPager.setAdapter(mSectionsPagerAdapter);
+
+                    TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+
+                    mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+                    tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+
                 } else {
                     onSignedOutActions();
                     startActivityForResult(
@@ -198,19 +214,6 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
                 }
             }
         };
-
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-
-        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
 
 
@@ -384,7 +387,9 @@ public class MainActivity extends AppCompatActivity implements ServiceFragment.O
     private void onSignedInActions(String userUid){
         mUserUid = userUid;
         databaseReference = firebaseDatabase.getReference().child(userUid).child("services");
+
         Log.e(mUserUid,userUid);
+
         Intent intentBroad = new Intent(getApplicationContext(), NewAppWidget.class);
         intentBroad.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(getApplicationContext());
